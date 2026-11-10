@@ -1,0 +1,40 @@
+:root { --ink: #25342e; --green: #176454; --muted: #65736b; --line: #dcded3; }
+.stApp { background: #f6f5f0; }
+.stMainBlockContainer { max-width: 1440px; padding-top: 2.4rem; padding-bottom: 2rem; }
+h1, h2, h3 { color: var(--ink); letter-spacing: -.035em; }
+h1 { font-family: Georgia, 'Times New Roman', serif !important; font-weight: 400 !important; font-size: 3.6rem !important; line-height: 1.08 !important; }
+h2 { font-family: Georgia, 'Times New Roman', serif !important; font-weight: 400 !important; font-size: 1.7rem !important; }
+h3 { font-size: 1.1rem !important; }
+p, label { line-height: 1.6; }
+[data-testid="stSidebar"] { background: #eeeee5; border-right: 1px solid var(--line); }
+[data-testid="stSidebar"] > div:first-child { padding-top: 1.6rem; }
+[data-testid="stMetric"] { padding: 1rem 1.15rem; background: #fffefa; border: 1px solid var(--line); border-radius: 4px; border-top: 3px solid #176454; }
+[data-testid="stMetricValue"] { font-family: Georgia, serif; color: var(--green); font-size: 2rem; }
+[data-testid="stMetricLabel"] { color: #465b50; }
+.stButton > button, .stDownloadButton > button, .stFormSubmitButton > button { border-radius: 4px; min-height: 2.7rem; }
+.stButton > button[kind="primary"], .stFormSubmitButton > button[kind="primary"] { background: #176454; border-color: #176454; }
+.stButton > button:focus-visible, .stDownloadButton > button:focus-visible { outline: 3px solid #b98027; outline-offset: 2px; }
+[data-baseweb="tab-list"] { gap: 1.8rem; border-bottom: 1px solid var(--line); }
+[data-baseweb="tab"] { padding: 1rem 0; font-size: .94rem; }
+[data-baseweb="tab-highlight"] { background: #176454; }
+.lab-brand { font-family: Georgia, serif; font-size: 1.6rem; color: #176454; padding-bottom: .2rem; }
+.lab-overline { color: #52675a; text-transform: uppercase; font-size: .68rem; font-weight: 650; letter-spacing: .19em; margin-bottom: .7rem; }
+.lab-masthead { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 1rem; margin-bottom: 1.6rem; gap: 1rem; }
+.lab-masthead span { font-size: .72rem; letter-spacing: .11em; text-transform: uppercase; color: #58695e; }
+.lab-status { background: #e3eadc; color: #36583e !important; border: 1px solid #cad8c3; border-radius: 3px; padding: .35rem .6rem; white-space: nowrap; }
+.lab-intro { max-width: 680px; color: #5c6a61; font-size: 1rem; margin: -.3rem 0 1.4rem; }
+.lab-flow { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; padding: 1rem 0 1.4rem; color: #647568; font-size: .83rem; }
+.lab-flow b { font-family: monospace; font-size: .77rem; border: 1px solid #ced8ca; background: #e9eee3; padding: .4rem .65rem; font-weight: 500; color: #305a45; }
+.lab-note { padding: .9rem 1rem; border-left: 3px solid #bb8c3c; background: #eeeade; color: #60533a; font-size: .78rem; margin: 1.3rem 0; line-height: 1.6; }
+.lab-run { color: #65736b; font-family: monospace; font-size: .76rem; margin: .4rem 0 1rem; }
+.lab-sentence { padding: 1rem 0; font: 1.35rem/1.6 Georgia, serif; }
+.lab-tokens { display: flex; flex-wrap: wrap; gap: .6rem; padding: 1rem 0; }
+.lab-token { display: flex; flex-direction: column; align-items: center; min-width: 65px; padding: .65rem .8rem; border: 1px solid #cddace; background: #eaf0e5; border-radius: 3px; }
+.lab-token strong { font: 1.2rem Georgia, serif; color: #25342e; }
+.lab-token small { font: .65rem monospace; letter-spacing: .06em; margin-top: .4rem; color: #316149; }
+.lab-token.verb { background: #f2e4cf; border-color: #e3c59c; }
+.lab-token.verb small { color: #77521f; }
+.lab-token.unknown { background: #f6e2de; border-color: #c98175; }
+.lab-footer { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 1rem; color: #687469; font-size: .72rem; }
+@media(max-width: 768px) { .stMainBlockContainer { padding: 4.5rem 1rem 2rem; } h1 { font-size: 2.6rem !important; } .lab-masthead { align-items: flex-start; } .lab-masthead span { font-size: .6rem; } [data-baseweb="tab-list"] { gap: .7rem; overflow-x: auto; } [data-baseweb="tab"] { font-size: .78rem; } .lab-footer { flex-direction: column; } }
+@media(prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
