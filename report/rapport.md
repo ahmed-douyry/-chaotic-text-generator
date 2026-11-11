@@ -1,6 +1,6 @@
 # Lab 03 — Chaotic Text Generator
 
-Ahmed Douyry · Master SDIA · 10 novembre 2026
+Ahmed Douyry · Master SDIA · 11 novembre 2026
 
 ## Problème et solution
 
@@ -12,9 +12,9 @@ Protocole : séparation par document, 960 phrases d’entraînement et 240 de te
 
 | Modèle | Structure valide | Sujet–verbe | Nouveauté | Distinct-2 |
 | --- | --- | --- | --- | --- |
-| HMM classique | 16.2% | 14.8% | 99.8% | 0.198 |
-| HMM à états séparés | 100.0% | 60.6% | 99.4% | 0.148 |
-| Trigramme | 57.0% | 76.0% | 91.2% | 0.105 |
+| HMM classique | 16,2 % | 14,8 % | 99,8 % | 0,198 |
+| HMM à états séparés | 100,0 % | 60,6 % | 99,4 % | 0,148 |
+| Trigramme | 57,0 % | 76,0 % | 91,2 % | 0,105 |
 
 ## États séparés : apport et limites
 
@@ -26,7 +26,7 @@ Jouet d’écriture : HMM à états séparés, T = 1,5 pour varier les mots en g
 
 ## Exemples et causes des échecs
 
-Exemple satisfaisant : « the children eat the bread at the park . » — patron valide, couple observé et phrase nouvelle ; cela reste un indicateur limité du sens. Échec de sens : « the lazy birds clean the apples . » — patron valide mais couple sujet–verbe absent du corpus : les émissions ne sont pas conditionnées par le sujet. Structure : un HMM classique peut terminer après le sujet. Mémorisation : « the girls leave the park . » est recopiée par le trigramme (T = 0,5).
+Exemple satisfaisant : « the children eat the bread at the park . » — patron valide, couple observé et phrase nouvelle ; cela reste un indicateur limité du sens. Limite sémantique : « the lazy birds clean the apples . » — patron valide mais couple sujet–verbe non observé (ce qui ne prouve pas une absurdité) : les émissions ne sont pas conditionnées par le sujet. Structure : un HMM classique peut terminer après le sujet. Mémorisation : « the girls leave the park . » est recopiée par le trigramme (T = 0,5).
 
 ## Du synthétique au réel
 
@@ -34,8 +34,22 @@ Le test réel utilise 12 544 phrases d’entraînement et 2 077 de test, 17 tags
 
 | Corpus / modèle | Précision | Connus | Inconnus | Phrase correcte |
 | --- | --- | --- | --- | --- |
-| Synthétique / HMM + Viterbi | 100.0% | 100.0% | sans OOV | 100.0% |
-| EWT / tag majoritaire | 86.16% | 90.83% | 28.59% | 31.87% |
-| EWT / HMM + Viterbi | 88.04% | 92.89% | 28.21% | 40.39% |
+| Synthétique / HMM + Viterbi | 100,0 % | 100,0 % | sans OOV | 100,0 % |
+| EWT / tag majoritaire | 86,16 % | 90,83 % | 28,59 % | 31,87 % |
+| EWT / HMM + Viterbi | 88,04 % | 92,89 % | 28,21 % | 40,39 % |
 
 Source EWT : https://github.com/UniversalDependencies/UD_English-EWT · CC BY-SA 4.0 · révision 491be069d36e378f67c29f183699eea88308ea42. Les résultats sont relatifs aux corpus ; ils ne mesurent pas la qualité de l’anglais réel.
+
+## Annexe — Captures de l’application
+
+### Figure 1 — Génération et mesure du lot
+
+![Génération et mesure du lot](../screenshots/01-generation-desktop.png)
+
+HMM à états séparés, T = 1,0, graine 42, 100 phrases. La capture montre les quatre indicateurs, les filtres, les états cachés et l’export CSV. Les scores (100 % de structures valides, 65 % de couples observés, 99 % de nouveauté, distinct-2 = 0,332) portent sur ce lot de démonstration ; le tableau de synthèse utilise 500 phrases. Distinct-2 dépend notamment de la taille du lot.
+
+### Figure 2 — Décodage Viterbi mot par mot
+
+![Décodage Viterbi mot par mot](../screenshots/02-viterbi-desktop.png)
+
+Phrase analysée : « the farmers watch the birds. ». Le mot ambigu watch reçoit ici le tag VERB ; la ponctuation est séparée des mots. Le tableau indique l’appartenance au vocabulaire. Cette capture illustre une phrase connue, pas le traitement des inconnus : celui-ci est vérifié séparément par les tests automatisés.

@@ -20,7 +20,8 @@ Le lancement à froid ne télécharge pas EWT : les métriques réelles et le ra
 | Corpus inclus | `data/corpus.csv` |
 | Évaluation synthétique | `results/metrics.json`, `results/run_log.txt` |
 | Évaluation réelle exécutée | `results/ewt_results.json`, `results/ewt_run_log.txt` |
-| Rapport PDF d’une page | `report/rapport.pdf` |
+| Synthèse PDF d’une page (consigne du TP) | `report/rapport_synthese.pdf` |
+| Rapport illustré avec les deux captures en annexe | `report/rapport.pdf` |
 | Deux captures de l’application | `screenshots/01-generation-desktop.png`, `screenshots/02-viterbi-desktop.png` |
 | Tests | `python -m unittest discover -s tests -v` |
 | URL du dépôt | https://github.com/ahmed-douyry/-chaotic-text-generator |

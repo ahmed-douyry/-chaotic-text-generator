@@ -1,9 +1,10 @@
-"""Build the one-page PDF and its Markdown source from measured results.
+"""Build the one-page summary and illustrated report from measured results.
 
 Run after both evaluations: python -m src.build_report
 Requires the optional report dependencies in requirements-report.txt.
 """
 import csv
+from copy import deepcopy
 import html
 import json
 from pathlib import Path
@@ -12,7 +13,7 @@ from reportlab.lib import colors
 from reportlab.lib.enums import TA_LEFT
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import mm
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, KeepTogether
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, KeepTogether, PageBreak, Image
 
 from src.laboratory import Laboratory, MODELS
 
@@ -44,14 +45,20 @@ def main():
     protocol = 'Protocole : séparation par document, 960 phrases d’entraînement et 240 de test ; 500 phrases générées par modèle et température, graine 42. Hypothèse : les états séparés devraient maximiser la validité structurelle. Les 10 premières phrases et les occurrences de watch sont consultables dans l’application ; watch est correctement étiqueté 37/37 fois au test.'
     split = 'Le HMM classique oublie si un nom est sujet ou objet : après NOUN, les probabilités VERB ≈ 0,39, PREP ≈ 0,22 et PUNCT ≈ 0,39 se mélangent. Les états S/O/P séparent ces rôles et restaurent les 16 patrons de la petite grammaire (100 % à T = 1). Ils ne modélisent pas le sens : seulement 60,6 % des couples sujet–verbe sont observés, contre 76,0 % pour le trigramme. Nouveauté et distinct-2 ne prouvent ni créativité ni correction.'
     temperatures = 'Jouet d’écriture : HMM à états séparés, T = 1,5 pour varier les mots en gardant une structure valide. Autocomplétion : trigramme, T = 0,5 pour privilégier les suites fréquentes ; sa validité baisse de 63,6 % à 44,2 % entre T = 0,5 et 2,5, tandis que distinct-2 augmente entre ces extrêmes (0,095 → 0,112), sans monotonie stricte. Le prix d’une température basse est davantage de répétitions et de copies.'
-    examples = f'Exemple satisfaisant : « {good["sentence"]} » — patron valide, couple observé et phrase nouvelle ; cela reste un indicateur limité du sens. Échec de sens : « {bad["sentence"]} » — patron valide mais couple sujet–verbe absent du corpus : les émissions ne sont pas conditionnées par le sujet. Structure : un HMM classique peut terminer après le sujet. Mémorisation : « the girls leave the park . » est recopiée par le trigramme (T = 0,5).'
+    examples = f'Exemple satisfaisant : « {good["sentence"]} » — patron valide, couple observé et phrase nouvelle ; cela reste un indicateur limité du sens. Limite sémantique : « {bad["sentence"]} » — patron valide mais couple sujet–verbe non observé (ce qui ne prouve pas une absurdité) : les émissions ne sont pas conditionnées par le sujet. Structure : un HMM classique peut terminer après le sujet. Mémorisation : « the girls leave the park . » est recopiée par le trigramme (T = 0,5).'
     m = real['models']['HMM + Viterbi']
     baseline = real['models']['most-frequent tag']
     interpretation = f'Le test réel utilise 12 544 phrases d’entraînement et 2 077 de test, 17 tags et 10 359 patrons, contre 6 tags et 16 patrons synthétiques. Les mots inconnus représentent {m["unknown_share_of_tokens"]:.1%} des tokens. Le HMM gagne {(m["accuracy"]-baseline["accuracy"])*100:.2f} points sur la baseline, mais ne réussit que {m["whole_sentence"]:.1%} des phrases entières. Pour un inconnu, k/(effectif du tag + kV) favorise les tags rares (X, INTJ) : la précision OOV reste faible. La métrique des 16 patrons ne se transpose pas à EWT. La mesure actuelle ({m["accuracy"]:.2%}, contre 88,1 % indicatif dans le guide) dépend de la révision du corpus ; le modèle ne garantit rien sur un autre domaine.'
     sections = [('Problème et solution', problem), ('Protocole et hypothèse', protocol), ('États séparés : apport et limites', split), ('Température et usages', temperatures), ('Exemples et causes des échecs', examples), ('Du synthétique au réel', interpretation)]
+    def french_number(value):
+        return value.replace('.', ',').replace('%', ' %')
+
+    gen_rows = [[row[0], *map(french_number, row[1:])] for row in gen_rows]
+    real_rows = [[row[0], *map(french_number, row[1:])] for row in real_rows]
+
     def md_table(header, rows):
         return '\n'.join(['| ' + ' | '.join(header) + ' |', '| ' + ' | '.join(['---']*len(header)) + ' |', *['| ' + ' | '.join(r) + ' |' for r in rows]])
-    markdown = '# Lab 03 — Chaotic Text Generator\n\nAhmed Douyry · Master SDIA · 10 novembre 2026\n\n'
+    markdown = '# Lab 03 — Chaotic Text Generator\n\nAhmed Douyry · Master SDIA · 11 novembre 2026\n\n'
     for title, body in sections:
         markdown += f'## {title}\n\n{body}\n\n'
         if title == 'Protocole et hypothèse':
@@ -61,12 +68,21 @@ def main():
     provenance = real.get('provenance', {})
     source = f"Source EWT : https://github.com/UniversalDependencies/UD_English-EWT · CC BY-SA 4.0 · révision {provenance.get('revision', 'fournie')}. Les résultats sont relatifs aux corpus ; ils ne mesurent pas la qualité de l’anglais réel."
     markdown += source + '\n'
-    (OUT / 'rapport.md').write_text(markdown, encoding='utf-8')
+    figures = [
+        ('01-generation-desktop.png', 'Génération et mesure du lot',
+         'HMM à états séparés, T = 1,0, graine 42, 100 phrases. La capture montre les quatre indicateurs, les filtres, les états cachés et l’export CSV. Les scores (100 % de structures valides, 65 % de couples observés, 99 % de nouveauté, distinct-2 = 0,332) portent sur ce lot de démonstration ; le tableau de synthèse utilise 500 phrases. Distinct-2 dépend notamment de la taille du lot.'),
+        ('02-viterbi-desktop.png', 'Décodage Viterbi mot par mot',
+         'Phrase analysée : « the farmers watch the birds. ». Le mot ambigu watch reçoit ici le tag VERB ; la ponctuation est séparée des mots. Le tableau indique l’appartenance au vocabulaire. Cette capture illustre une phrase connue, pas le traitement des inconnus : celui-ci est vérifié séparément par les tests automatisés.'),
+    ]
+    markdown += '\n## Annexe — Captures de l’application\n\n'
+    for index, (filename, title, caption) in enumerate(figures, 1):
+        markdown += f'### Figure {index} — {title}\n\n![{title}](../screenshots/{filename})\n\n{caption}\n\n'
+    (OUT / 'rapport.md').write_text(markdown.rstrip() + '\n', encoding='utf-8')
     body_style = ParagraphStyle('body', fontName='Helvetica', fontSize=8.3, leading=11.1, textColor=INK, spaceAfter=5)
     heading_style = ParagraphStyle('heading', parent=body_style, fontName='Helvetica-Bold', fontSize=9.3, leading=12, textColor=GREEN, spaceBefore=6, spaceAfter=3)
     title_style = ParagraphStyle('title', parent=body_style, fontName='Times-Roman', fontSize=26, leading=30, spaceAfter=7)
     small_style = ParagraphStyle('small', parent=body_style, fontSize=6.6, leading=8.4, textColor=colors.HexColor('#5d6e63'))
-    story = [Paragraph('CHAOTIC. / NLP — LAB 03', heading_style), Paragraph('Générer, mesurer, comprendre.', title_style), Paragraph('Ahmed Douyry · Master SDIA · 10 novembre 2026', small_style), Spacer(1, 3*mm)]
+    story = [Paragraph('CHAOTIC. / NLP — LAB 03', heading_style), Paragraph('Générer, mesurer, comprendre.', title_style), Paragraph('Ahmed Douyry · Master SDIA · 11 novembre 2026', small_style), Spacer(1, 3*mm)]
     def add_table(header, rows, widths):
         table_style = ParagraphStyle('cell', parent=body_style, fontSize=7.1, leading=9, spaceAfter=0)
         cells = [[Paragraph(html.escape(x), table_style) for x in row] for row in [header] + rows]
@@ -87,7 +103,27 @@ def main():
         canvas.setFillColor(GREEN)
         canvas.drawString(21*mm, 12*mm, 'CHAOTIC / Rapport expérimental')
         canvas.drawRightString(189*mm, 12*mm, str(doc.page))
-    SimpleDocTemplate(str(OUT / 'rapport.pdf'), pagesize=(210*mm, 297*mm), rightMargin=21*mm, leftMargin=21*mm, topMargin=18*mm, bottomMargin=18*mm, title='Lab 03 — Chaotic Text Generator', author='Ahmed Douyry').build(story, onFirstPage=decorate, onLaterPages=decorate)
+    def build_pdf(filename, content):
+        SimpleDocTemplate(
+            str(OUT / filename), pagesize=(210*mm, 297*mm),
+            rightMargin=21*mm, leftMargin=21*mm, topMargin=18*mm,
+            bottomMargin=18*mm, title='Lab 03 — Chaotic Text Generator',
+            author='Ahmed Douyry',
+        ).build(content, onFirstPage=decorate, onLaterPages=decorate)
+
+    build_pdf('rapport_synthese.pdf', deepcopy(story))
+    for index, (filename, title, caption) in enumerate(figures, 1):
+        screenshot = Image(str(ROOT / 'screenshots' / filename))
+        screenshot.drawHeight *= (168*mm / screenshot.drawWidth)
+        screenshot.drawWidth = 168*mm
+        story.extend([
+            PageBreak(), Paragraph('ANNEXE / APPLICATION', heading_style),
+            Paragraph(title, title_style),
+            Paragraph(f'Figure {index} · Capture de l’application Streamlit', small_style),
+            Spacer(1, 8*mm), screenshot, Spacer(1, 6*mm),
+            Paragraph(html.escape(caption), body_style),
+        ])
+    build_pdf('rapport.pdf', story)
     # Classify every sentence from the supplied failure file, preserving multiple defects.
     failure_rows = []
     for line in (ROOT / 'results/failures.txt').read_text().splitlines():
@@ -110,7 +146,7 @@ def main():
         writer = csv.DictWriter(output, fieldnames=['phrase', 'tags', 'classe'])
         writer.writeheader()
         writer.writerows(failure_rows)
-    print('Created report/rapport.pdf, report/rapport.md, report/failures_classified.csv')
+    print('Created report/rapport.pdf, report/rapport_synthese.pdf, report/rapport.md, report/failures_classified.csv')
 
 
 if __name__ == '__main__':
