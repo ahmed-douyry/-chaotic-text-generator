@@ -12,3 +12,12 @@ output/
 *.zip
 .coverage
 htmlcov/
+
+# Submission documents and generated evaluation outputs
+report/
+screenshots/
+DEPLOYMENT.md
+requirements-report.txt
+src/build_report.py
+results/*
+!results/ewt_results.json

@@ -215,12 +215,6 @@ with notebook:
     with st.expander("watch dans les données d’entraînement"):
         examples = [{"Phrase": " ".join(w), "Tags de watch": ", ".join(t[i] for i, word in enumerate(w) if word == "watch")} for w, t in lab.train if "watch" in w]
         st.dataframe(pd.DataFrame(examples), hide_index=True, width="stretch", height=250)
-    report = ROOT / "report/rapport.pdf"
-    if report.exists():
-        st.download_button("↓ Rapport illustré · PDF", report.read_bytes(), file_name="rapport_chaotic_text_generator.pdf", mime="application/pdf")
-    summary = ROOT / "report/rapport_synthese.pdf"
-    if summary.exists():
-        st.download_button("↓ Synthèse · 1 page", summary.read_bytes(), file_name="synthese_chaotic_text_generator.pdf", mime="application/pdf")
     st.caption("Les textes produits sont générés par un modèle probabiliste. Ils n’expriment aucune intention. Utiliser uniquement des corpus dont on a le droit d’usage ; ne pas entraîner sur des messages privés sans autorisation.")
 
 st.markdown('<div class="lab-footer"><span>chaotic. / Laboratoire de génération probabiliste</span><span>HMM · Viterbi · Trigrammes &nbsp; / &nbsp; Lab 03</span></div>', unsafe_allow_html=True)

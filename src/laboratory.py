@@ -1,4 +1,4 @@
-"""Reproducible experiments shared by the UI, report, and checks."""
+"""Reproducible experiments shared by the UI and automated checks."""
 import csv
 import io
 import random
